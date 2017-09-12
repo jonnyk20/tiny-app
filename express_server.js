@@ -49,12 +49,12 @@ app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
   console.log(urlDatabase);
   res.redirect("/urls");
-});
+}); // handle not found error
 
 app.post("/urls/:id", (req, res) => {
-  urlDatabase[req.params.id] = req.body.longURL;rs
+  urlDatabase[req.params.id] = req.body.longURL;
   res.redirect("/urls");
-});
+}); // handle not found error
 
 
 app.get("/urls/:id", (req, res) => {

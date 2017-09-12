@@ -8,10 +8,19 @@
     <% include ./partials/_header %>
     <h2>Links</h2>
     <ul>
-    <% Object.keys(urlDatabase).forEach(function(link) { %>
-    <a href="/urls/<%= link %>">
-    <li><%= link %> - <%= urlDatabase[link] %> <button> Shorten </button></li>
+    <% Object.keys(urlDatabase).forEach(function(link) { %> 
+    <li>
+    <a href="/u/<%= link %>">
+    <%= link %> - <%= urlDatabase[link] %> 
     </a>
+    &nbsp;&nbsp;
+    <a href="/urls/<%= link %>">
+    Edit Link
+    </a>
+    <form method="POST" action="/urls/<%= link %>/delete">
+    <input type="submit" value="Delete">
+    </form>
+    </li>
     <% }); %>
     </ul>
 </body>

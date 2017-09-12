@@ -41,28 +41,21 @@ app.get("/", (req, res) => {
   res.end("hello :)")
 });
 
-app.get("/urls", (req, res) => {
-  // let templateVars = { urls: urlDatabase };
-  // res.render("urls_index", templateVars);
-  res.render("urls_index", {
-    urlDatabase: urlDatabase
-  })
-});
-
-
-
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
-app.post("/urls", (req, res) => {
-  var newLink = newShortlink();
-  urlDatabase[newLink] = req.body.longURL;
+app.post("/urls/:id/delete", (req, res) => {
+  delete urlDatabase[req.params.id];
   console.log(urlDatabase);
-  console.log(req.body);  // debug statement to see POST parameters
-  //res.send("Ok");         // Respond with 'Ok' (we will replace this)
-  res.redirect(301, "/urls/" + newLink);
+  res.redirect("/urls");
 });
+
+app.post("/urls/:id", (req, res) => {
+  urlDatabase[req.params.id] = req.body.longURL;rs
+  res.redirect("/urls");
+});
+
 
 app.get("/urls/:id", (req, res) => {
   res.render("urls_show", {
@@ -71,12 +64,28 @@ app.get("/urls/:id", (req, res) => {
   });
 });
 
+
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-app.get("/hello", (req, res) => {
-  res.end("<html><body>Hello <b>World</b></body></html>\n");
+app.get("/urls", (req, res) => {
+  res.render("urls_index", {
+    urlDatabase: urlDatabase
+  })
+});
+
+app.post("/urls", (req, res) => {
+  var newLink = newShortlink();
+  urlDatabase[newLink] = req.body.longURL;
+  res.redirect(302, "/urls/" + newLink);
+});
+
+
+app.get("/u/:shortURL", (req, res) => {
+  // let longURL = ...
+  let longURL = urlDatabase[req.params.shortURL];
+  res.redirect(longURL);
 });
 
 app.listen(PORT, () => {

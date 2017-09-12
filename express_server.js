@@ -9,6 +9,27 @@ var urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+function newShortlink(){
+  var n
+}
+
+function generateRandomString() {
+  var charString = [];
+  while (charString.length < 6){
+  var min = 48; //0
+  var max = 90; // Z
+  var num = Math.floor(Math.random() * ((max-min)+1) + min);
+  if ( (num >= 48 && num <= 57 ) ||
+       (num >= 65 && num <= 90 ) ) {
+    // if generated num is alphanumeric
+    charString.push(String.fromCharCode(num).toLowerCase());
+
+  }
+}
+  
+  return charString.join("");
+}
+
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
@@ -31,6 +52,7 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
+  console.log(generateRandomString())
   console.log(req.body);  // debug statement to see POST parameters
   res.send("Ok");         // Respond with 'Ok' (we will replace this)
 });

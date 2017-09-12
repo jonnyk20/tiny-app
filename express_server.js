@@ -56,11 +56,12 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  urlDatabase[newShortlink()] = req.body.longURL;
+  var newLink = newShortlink();
+  urlDatabase[newLink] = req.body.longURL;
   console.log(urlDatabase);
   console.log(req.body);  // debug statement to see POST parameters
   //res.send("Ok");         // Respond with 'Ok' (we will replace this)
-  res.redirect(301, 'http://example.com');
+  res.redirect(301, "/urls/" + newLink);
 });
 
 app.get("/urls/:id", (req, res) => {

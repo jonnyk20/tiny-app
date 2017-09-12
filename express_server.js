@@ -10,7 +10,7 @@ var urlDatabase = {
 };
 
 function newShortlink(){
-  var n
+  return generateRandomString();
 }
 
 function generateRandomString() {
@@ -26,8 +26,12 @@ function generateRandomString() {
 
   }
 }
-  
-  return charString.join("");
+  var output = charString.join("");
+  if (urlDatabase[output]){
+    return generateRandomString();
+  } else {
+    return charString.join("");
+  }
 }
 
 const bodyParser = require("body-parser");
@@ -52,9 +56,11 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(generateRandomString())
+  urlDatabase[newShortlink()] = req.body.longURL;
+  console.log(urlDatabase);
   console.log(req.body);  // debug statement to see POST parameters
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  //res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  res.redirect(301, 'http://example.com');
 });
 
 app.get("/urls/:id", (req, res) => {

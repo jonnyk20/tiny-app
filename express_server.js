@@ -1,13 +1,21 @@
 var express = require("express");
+var cookieParser = require('cookie-parser');
+
 var app = express();
 var PORT = process.env.PORT || 8080;
 
 app.set("view engine", "ejs");
 
+
+
 var urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+
+// let templateVars = {
+//   urls: urlDatabase
+// };
 
 function newShortlink(){
   return generateRandomString();
@@ -23,7 +31,6 @@ function generateRandomString() {
        (num >= 65 && num <= 90 ) ) {
     // if generated num is alphanumeric
     charString.push(String.fromCharCode(num).toLowerCase());
-
   }
 }
   var output = charString.join("");
@@ -37,8 +44,31 @@ function generateRandomString() {
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
+app.use(cookieParser());
+
+//pass login cookie and urlDatabase to templates using local variables
+app.use(function (request, response, next) {
+  response.locals = {
+    username : request.cookies['username'],
+    urlDatabase: urlDatabase
+  };
+  next();
+});
+
+
 app.get("/", (req, res) => {
   res.end("hello :)")
+});
+
+app.post("/login", (req, res) => {
+  let newUser = req.body.username;
+  res.cookie('username', newUser);
+  res.redirect("/urls");
+});
+
+app.post("/logout", (req, res) => {
+  res.clearCookie('username');
+  res.end("Logged Out!");
 });
 
 app.get("/urls/new", (req, res) => {
@@ -49,12 +79,12 @@ app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
   console.log(urlDatabase);
   res.redirect("/urls");
-}); // handle not found error
+}); 
 
 app.post("/urls/:id", (req, res) => {
   urlDatabase[req.params.id] = req.body.longURL;
   res.redirect("/urls");
-}); // handle not found error
+}); 
 
 
 app.get("/urls/:id", (req, res) => {
@@ -70,9 +100,7 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  res.render("urls_index", {
-    urlDatabase: urlDatabase
-  })
+  res.render("urls_index")
 });
 
 app.post("/urls", (req, res) => {

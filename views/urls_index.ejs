@@ -7,11 +7,14 @@
     <!-- Add your EJS code here -->
     <% include ./partials/_header %>
     <h2>Links</h2>
+    <div>
+      <a href="/urls/new"><button>Create New Link</button></a>
+    <div>
     <ul>
     <% Object.keys(urlDatabase).forEach(function(link) { %> 
     <li>
     <a href="/u/<%= link %>">
-    <%= link %> - <%= urlDatabase[link] %> 
+    <%= link %> - <%= urlDatabase[link].fullLink %> (<%= urlDatabase[link].owner %>)
     </a>
     &nbsp;&nbsp;
     <a href="/urls/<%= link %>">

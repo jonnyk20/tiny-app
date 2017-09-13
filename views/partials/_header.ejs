@@ -1,15 +1,15 @@
 <div> TinyApp </div>
 
 
-<% if(user != undefined){ %>
+<% if(user){ %>
   <div> Logged in As: <%= user.email %></div>
   <form action="/logout" method="POST" style="">
     <input type="submit" value="Logout">
   </form>
 <% } else{ %>  
   <div> Please Login or Register
-
-  
+   <a href="/login"> <button> Login </button> <a>
+   <a href="/register"> <button> Register </button> <a>
   </div>
 <% } %>
 

@@ -2,6 +2,6 @@
 <h4>Tiny Url: <%= selected %><h4> 
 <form action="/urls/<%= selected %>" method="POST" style="margin:150px;">
   <label for="longURL">Edit url:</label>
-  <input id="longURL" type="text" name="longURL" value="<%= urlDatabase[selected] %>" style="width: 300px">
+  <input id="longURL" type="text" name="longURL" value="<%= urlDatabase[selected].fullLink  %>" style="width: 300px">
   <input type="submit" value="update">
 </form>

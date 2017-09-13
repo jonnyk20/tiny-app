@@ -79,6 +79,15 @@ function generateRandomString(database) {
   }
 }
 
+function entrypt(pw){
+  return bcrypt.hashSync(pw, 10);
+}
+
+for (let user in users){
+  users[user].password = bcrypt.hashSync(users[user].password, 10);
+}
+
+
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
@@ -112,7 +121,11 @@ app.post("/login", (req, res) => {
   let emailEntered = req.body.email;
   let idFound = findUserByEmail(emailEntered);
   let pwEntered = req.body.password;
-  if ( idFound && (users[idFound].password === pwEntered)){
+  // console.log("Stored Password", users[idFound].password);
+  // console.log("Entered Password", users[idFound].password);
+  if ( idFound && 
+    ( bcrypt.compareSync(pwEntered, users[idFound].password))
+    ){
     res.cookie('user_id', idFound);
     res.redirect("/urls");
   } else {
@@ -140,11 +153,11 @@ app.post("/register", (req, res) => {
   users[newID] = {
     id: newID, 
     email: newEmail, 
-    password: newPassword   
+    password: bcrypt.hashSync(newPassword, 10)  
   };
   res.cookie('user_id', newID);
   res.redirect("/urls");
-}
+  }
 });
 
 app.get("/urls/new", (req, res) => {
@@ -200,5 +213,5 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`Tiny App listening on port ${PORT}!`);
 });

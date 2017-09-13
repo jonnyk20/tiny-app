@@ -9,7 +9,7 @@ app.set("view engine", "ejs");
 var urlDatabase = {
   "b2xVn2": {fullLink: "http://www.lighthouselabs.ca", owner: "userRandomID"},
   "9sm5xK": {fullLink: "http://www.google.com", owner: "user2RandomID"},
-  "123abc": {fullLink: "http://www.jon.com", owner: "jonjon"}
+  "123abc": {fullLink: "http://www.canada.com", owner: "jonjon"}
 };
 
 const users = { 
@@ -195,7 +195,7 @@ app.post("/urls", (req, res) => {
 
 
 app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL];
+  let longURL = urlDatabase[req.params.shortURL].fullLink;
   res.redirect(longURL);
 });
 

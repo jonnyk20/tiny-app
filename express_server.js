@@ -26,9 +26,19 @@ const users = {
   }
 }
 
-// let templateVars = {
-//   urls: urlDatabase
-// };
+function findUserByEmail(enteredEmail){
+  var userID;
+  for (user in users){
+    if (users[user].email === enteredEmail){
+      userID = user;
+    }
+  }
+  if (userID){
+    return userID;
+  } else {
+    return false;
+  }
+}
 
 function returnRandomString(database){
   return generateRandomString(database);
@@ -61,9 +71,10 @@ app.use(cookieParser());
 
 //pass login cookie and urlDatabase to templates using local variables
 app.use(function (request, response, next) {
+  const userID = request.cookies['user_id']
   response.locals = {
-    username : request.cookies['username'],
-    urlDatabase: urlDatabase
+    urlDatabase: urlDatabase, 
+    user: users[userID]
   };
   next();
 });
@@ -73,14 +84,9 @@ app.get("/", (req, res) => {
   res.end("hello :)")
 });
 
-app.post("/login", (req, res) => {
-  let newUser = req.body.username;
-  res.cookie('username', newUser);
-  res.redirect("/urls");
-});
 
 app.post("/logout", (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect("/urls");  
 });
 
@@ -88,18 +94,41 @@ app.get("/register", (req, res) => {
   res.render("register");
 });
 
+app.get("/login", (req, res) => {
+  res.render("login");
+});
+
+app.post("/login", (req, res) => {
+  let emailEntered = req.body.email;
+  let idFound = findUserByEmail(emailEntered);
+  let pwEntered = req.body.password;
+  if ( idFound && (users[idFound].password === pwEntered)){
+    res.cookie('user_id', idFound);
+    res.redirect("/urls");
+  } else {
+    res.statusCode = 400;
+    res.end("Incorrect username or password")
+  }
+});
+
+
+
 app.post("/register", (req, res) => {
   let newEmail = req.body.email;
   let newPassword = req.body.password;
+  if (newEmail == '' || newPassword == '') {
+    res.statusCode = 400;
+    res.end("email or password field empty");
+  } else {
   let newID = returnRandomString(users);
   users[newID] = {
     id: newID, 
     email: newEmail, 
     password: newPassword   
   };
-  console.log(users);
-  res.end("registered");
- // res.redirect("/urls");
+  res.cookie('user_id', newID);
+  res.redirect("/urls");
+}
 });
 
 app.get("/urls/new", (req, res) => {

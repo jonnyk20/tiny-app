@@ -1,5 +1,6 @@
 var express = require("express");
-var cookieParser = require('cookie-parser');
+//var cookieParser = require('cookie-parser');
+var cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
 
 var app = express();
@@ -91,11 +92,16 @@ for (let user in users){
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
-app.use(cookieParser());
+//app.use(cookieParser());
+
+app.use(cookieSession({
+  name: 'session',
+  keys: ['key1', 'key2']
+}))
 
 //pass login cookie and urlDatabase to templates using local variables
 app.use(function (request, response, next) {
-  const userID = request.cookies['user_id']
+  const userID = request.session.user_id
   response.locals = {
     urlDatabase: urlsForUser(userID), 
     user: users[userID]
@@ -109,7 +115,7 @@ app.get("/", (req, res) => {
 
 
 app.post("/logout", (req, res) => {
-  res.clearCookie('user_id');
+  req.session = null;
   res.redirect("/urls");  
 });
 
@@ -126,7 +132,7 @@ app.post("/login", (req, res) => {
   if ( idFound && 
     ( bcrypt.compareSync(pwEntered, users[idFound].password))
     ){
-    res.cookie('user_id', idFound);
+    req.session.user_id = idFound;
     res.redirect("/urls");
   } else {
     res.statusCode = 400;
@@ -155,14 +161,14 @@ app.post("/register", (req, res) => {
     email: newEmail, 
     password: bcrypt.hashSync(newPassword, 10)  
   };
-  res.cookie('user_id', newID);
+  req.session.user_id = newID;
   res.redirect("/urls");
   }
 });
 
 app.get("/urls/new", (req, res) => {
-  if (req.cookies['user_id'] &&
-      users[req.cookies['user_id']]
+  if (req.session.user_id &&
+      users[req.session.user_id]
       ){
     res.render("urls_new");
   } else {
@@ -181,7 +187,7 @@ app.post("/urls/:id", (req, res) => {
 }); 
 
 app.get("/urls/:id", (req, res) => {
-  if (req.cookies['user_id'] === urlDatabase[req.params.id].owner) {
+  if (req.session.user_id === urlDatabase[req.params.id].owner) {
     res.render("urls_show", {
       urlDatabase: urlDatabase,
       selected: req.params.id
@@ -202,7 +208,7 @@ app.get("/urls", (req, res) => {
 
 app.post("/urls", (req, res) => {
   var newLink = returnRandomString(urlDatabase);
-  urlDatabase[newLink] = {fullLink: req.body.longURL, owner: req.cookies['user_id'] };
+  urlDatabase[newLink] = {fullLink: req.body.longURL, owner: req.session.user_id };
   res.redirect(302, "/urls/" + newLink);
 });
 

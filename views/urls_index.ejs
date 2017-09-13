@@ -4,28 +4,27 @@
   <title>TinyApp</title>
 </head>
 <body>
-    <!-- Add your EJS code here -->
-    <% include ./partials/_header %>
-    <h2>Links</h2>
-    <div>
-      <a href="/urls/new"><button>Create New Link</button></a>
-    <div>
-    <ul>
-    <% Object.keys(urlDatabase).forEach(function(link) { %> 
-    <li>
-    <a href="/u/<%= link %>">
-    <%= link %> - <%= urlDatabase[link].fullLink %> (<%= urlDatabase[link].owner %>)
-    </a>
-    &nbsp;&nbsp;
-    <a href="/urls/<%= link %>">
-      Edit Link
-    </a>
-    <form method="POST" action="/urls/<%= link %>/delete">
-    <input type="submit" value="Delete">
-    </form>
-    </li>
-    <% }); %>
-    </ul>
-    
+  <!-- Add your EJS code here -->
+  <% include ./partials/_header %>
+  <h2>Links</h2>
+  <div>
+    <a href="/urls/new"><button>Create New Link</button></a>
+  <div>
+  <ul>
+  <% Object.keys(urlDatabase).forEach(function(link) { %> 
+  <li>
+  <a href="/u/<%= link %>">
+  <%= link %> - <%= urlDatabase[link].fullLink %> (<%= urlDatabase[link].owner %>)
+  </a>
+  &nbsp;&nbsp;
+  <a href="/urls/<%= link %>">
+    Edit Link
+  </a>
+  <form method="POST" action="/urls/<%= link %>/delete">
+  <input type="submit" value="Delete">
+  </form>
+  </li>
+  <% }); %>
+  </ul>
 </body>
 </html>

@@ -13,15 +13,28 @@ var urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
+
 // let templateVars = {
 //   urls: urlDatabase
 // };
 
-function newShortlink(){
-  return generateRandomString();
+function newShortlink(database){
+  return generateRandomString(database);
 }
 
-function generateRandomString() {
+function generateRandomString(database) {
   var charString = [];
   while (charString.length < 6){
   var min = 48; //0
@@ -34,7 +47,7 @@ function generateRandomString() {
   }
 }
   var output = charString.join("");
-  if (urlDatabase[output]){
+  if (database[output]){
     return generateRandomString();
   } else {
     return charString.join("");
@@ -71,6 +84,18 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");  
 });
 
+app.get("/register", (req, res) => {
+  res.render("register");
+});
+
+app.post("/register", (req, res) => {
+  // let newUser = req.body.username;
+  // let newPAssword = req.body.password;
+ console.log(req.body);
+ res.end("registered");
+ // res.redirect("/urls");
+});
+
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
@@ -104,7 +129,7 @@ app.get("/urls", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  var newLink = newShortlink();
+  var newLink = newShortlink(urlDatabase);
   urlDatabase[newLink] = req.body.longURL;
   res.redirect(302, "/urls/" + newLink);
 });

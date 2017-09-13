@@ -30,7 +30,7 @@ const users = {
 //   urls: urlDatabase
 // };
 
-function newShortlink(database){
+function returnRandomString(database){
   return generateRandomString(database);
 }
 
@@ -89,10 +89,16 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  // let newUser = req.body.username;
-  // let newPAssword = req.body.password;
- console.log(req.body);
- res.end("registered");
+  let newEmail = req.body.email;
+  let newPassword = req.body.password;
+  let newID = returnRandomString(users);
+  users[newID] = {
+    id: newID, 
+    email: newEmail, 
+    password: newPassword   
+  };
+  console.log(users);
+  res.end("registered");
  // res.redirect("/urls");
 });
 
@@ -129,7 +135,7 @@ app.get("/urls", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  var newLink = newShortlink(urlDatabase);
+  var newLink = returnRandomString(urlDatabase);
   urlDatabase[newLink] = req.body.longURL;
   res.redirect(302, "/urls/" + newLink);
 });

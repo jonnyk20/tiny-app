@@ -1,5 +1,6 @@
 var express = require("express");
 var cookieParser = require('cookie-parser');
+const bcrypt = require('bcrypt');
 
 var app = express();
 var PORT = process.env.PORT || 8080;
@@ -87,7 +88,6 @@ app.use(cookieParser());
 app.use(function (request, response, next) {
   const userID = request.cookies['user_id']
   response.locals = {
-    // urlDatabase: urlDatabase, 
     urlDatabase: urlsForUser(userID), 
     user: users[userID]
   };

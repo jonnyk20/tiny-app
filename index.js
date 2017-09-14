@@ -230,16 +230,21 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
-// access urledit page
+// access url edit page
 app.get("/urls/:id", (req, res) => {
-  if (req.session.user_id === urlDatabase[req.params.id].owner) {
+  if (!urlDatabase[req.params.id]){
+    res.render("unknown-url");
+  } else if (!req.session.user_id){
+    res.render("forbidden");
+  } else if(req.session.user_id === urlDatabase[req.params.id].owner) {
     res.render("urls_show", {
       link: req.params.id,
       linkObject: urlDatabase[req.params.id],
       unique: countUniqueVisitors(req.params.id)
     });
   } else {
-    res.end("only link owner can edit")
+    res.statusCode = 401;
+    res.render("wrong-user");
   }
 });
 
@@ -260,13 +265,17 @@ app.delete("/urls/:id", (req, res) => {
 
 // urls index page
 app.get("/urls", (req, res) => {
-  let uniqueVisits = {};
-  for (url in urlDatabase){
-    uniqueVisits[url] = countUniqueVisitors(url);
+  if (req.session.user_id){
+    let uniqueVisits = {};
+    for (url in urlDatabase){
+      uniqueVisits[url] = countUniqueVisitors(url);
+    }
+    res.render("urls_index", {
+      uniqueVisits: uniqueVisits
+    })
+  } else {
+    res.render("forbidden");
   }
-  res.render("urls_index", {
-    uniqueVisits: uniqueVisits
-  })
 });
 
 // create url

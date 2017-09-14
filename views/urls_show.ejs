@@ -14,28 +14,25 @@
             <h4 class="inline">Minified Url: <a href="/u/<%= link %>"><%= link %></a> <h4> 
           </div>
           <div class="col-sm-3 stat">
+            <div>Created:  <%= linkObject.created %></div>
+          </div>
+          <div class="col-sm-2 stat">
             <div class="inline">Visits: <%= linkObject.visits.length %> </div>
           </div>
-          <div class="col-sm-3 stat">
-            <div>visitors:  <%= unique %></div>
+          <div class="col-sm-2 stat">
+            <div>Visitors:  <%= unique %></div>
           </div>
-          <div class="col-sm-3">
+          <div class="col-sm-2">
             <form method="POST" class="float-right" action="/urls/<%= link %>?_method=DELETE">
               <button class="btn btn-default btn-sm" type="submit">Delete Link</button>
             </form>
           </div>
         </div>
-
-
-
         <form action="/urls/<%= link %>?_method=PUT" method="POST" class="dark-blue form-control">
+          <h3 class="dark-blue text-default"> Edit Full URL </h3>
           <input id="longURL" type="text" class="dark-blue" name="longURL" value="<%= linkObject.fullLink  %>" style="width: 300px">
           <button type="submit" class="btn btn-primary btn-sm"> Change URL </button>
         </form>
-
-
-     
-
         <table class="table">
           <thead>
             <tr class="dark-blue">
@@ -56,10 +53,6 @@
             <% }); %>
           </tbody>
         </table>
-
-
-
-
     </div>
   </body>
 </html>

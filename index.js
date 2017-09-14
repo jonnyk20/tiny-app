@@ -1,16 +1,18 @@
 var express = require("express");
-//var cookieParser = require('cookie-parser');
-var cookieSession = require('cookie-session');
+
+const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
-var methodOverride = require('method-override');
+const methodOverride = require('method-override');
 const moment = require('moment');
+const bodyParser = require("body-parser");
 
 var app = express();
 var PORT = process.env.PORT || 8080;
 
 app.set("view engine", "ejs");
 
-var urlDatabase = {
+// data-storing objects
+const urlDatabase = {
   "b2xVn2": {
     fullLink: "http://www.lighthouselabs.ca", 
     owner: "userRandomID",
@@ -25,15 +27,15 @@ var urlDatabase = {
     owner: "jonjon",
     visits: [{
               visitor: "visitor1",
-              time: 1505347209656
+              time: "Wednesday, September 13th 2017, 9:34:44 pm"
               },
               {
                 visitor: "visitor1",
-                time: 1505347209699  
+                time: "Thursday, September 14th 2017, 2:21:05 am"
               },
               {
                 visitor: "visitor2",
-                time: 1505347209814  
+                time: "Thursday, September 14th 2017, 5:28:19 am"
               },
     ]
   }
@@ -59,6 +61,7 @@ const users = {
   }
 }
 
+// helper functions
 function findUserByEmail(enteredEmail){
   var userID;
   for (user in users){
@@ -93,39 +96,42 @@ function countUniqueVisitors(link){
   return uniqueVisitors.length;
 }
 
-function returnRandomString(database){
-  return generateRandomString(database);
-}
-
 function generateRandomString(database) {
-  var charString = [];
-  while (charString.length < 6){
-  var min = 48; //0
-  var max = 90; // Z
-  var num = Math.floor(Math.random() * ((max-min)+1) + min);
-  if ( (num >= 48 && num <= 57 ) ||
-       (num >= 65 && num <= 90 ) ) {
-    // if generated num is alphanumeric
-    charString.push(String.fromCharCode(num).toLowerCase());
+  let str = "";
+  const strLength = 6;
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  for (var i = 0; i < strLength; i++) {
+    str += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
   }
-}
-  var output = charString.join("");
-  if (database[output]){
+  
+  if (database[str]){
     return generateRandomString();
   } else {
-    return charString.join("");
+    return str;
   }
+}
+
+function returnRandomString(database){
+  return generateRandomString(database);
 }
 
 function entrypt(pw){
   return bcrypt.hashSync(pw, 10);
 }
 
+function saveLink(link){
+  if (link.includes("http://")){
+   return link;
+  } else {
+    return "http://" + link;
+  }
+}
+
 for (let user in users){
   users[user].password = bcrypt.hashSync(users[user].password, 10);
 }
 
-const bodyParser = require("body-parser");
+
 app.use(bodyParser.urlencoded({extended: true}));
 
 app.use(methodOverride('_method'));
@@ -145,20 +151,46 @@ app.use(function (request, response, next) {
   next();
 });
 
+
 app.get("/", (req, res) => {
-  res.end("hello :)")
+  res.redirect("/urls");
 });
 
-
-app.post("/logout", (req, res) => {
-  req.session = null;
-  res.redirect("/urls");  
+// access registration page
+app.get("/register", (req, res) => {
+  res.render("register");
 });
 
+// register new user
+app.post("/register", (req, res) => {
+  let newEmail = req.body.email;
+  let newPassword = req.body.password;
+  if (newEmail == '' || newPassword == '') {
+    res.statusCode = 400;
+    res.end("email or password field empty");
+  } else if (findUserByEmail(newEmail)) {
+    res.statusCode = 400;
+    res.end("Email already in use");
+  }
+
+  else {
+  let newID = returnRandomString(users);
+  users[newID] = {
+    id: newID, 
+    email: newEmail, 
+    password: bcrypt.hashSync(newPassword, 10)  
+  };
+  req.session.user_id = newID;
+  res.redirect("/urls");
+  }
+});
+
+// access login page
 app.get("/login", (req, res) => {
   res.render("login");
 });
 
+// log in
 app.post("/login", (req, res) => {
   let emailEntered = req.body.email;
   let idFound = findUserByEmail(emailEntered);
@@ -174,34 +206,13 @@ app.post("/login", (req, res) => {
   }
 });
 
-app.get("/register", (req, res) => {
-  res.render("register");
+// log out
+app.post("/logout", (req, res) => {
+  req.session = null;
+  res.redirect("/urls");  
 });
 
-app.post("/register", (req, res) => {
-  let newEmail = req.body.email;
-  let newPassword = req.body.password;
-  if (newEmail == '' || newPassword == '') {
-    res.statusCode = 400;
-    res.end("email or password field empty");
-  } else if (findUserByEmail(newEmail)) {
-    res.statusCode = 400;
-    res.end("Email already in use");
-  }
-  else {
-  let newID = returnRandomString(users);
-  users[newID] = {
-    id: newID, 
-    email: newEmail, 
-    password: bcrypt.hashSync(newPassword, 10)  
-  };
-  req.session.user_id = newID;
-  res.redirect("/urls");
-  }
-});
-
-
-
+// access link-creation page
 app.get("/urls/new", (req, res) => {
   if (req.session.user_id &&
       users[req.session.user_id]
@@ -212,21 +223,7 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
-app.post("/urls/:id", (req, res) => {
-  urlDatabase[req.params.id].fullLink  = req.body.longURL;
-  res.redirect("/urls");
-}); 
-
-app.delete("/urls/:id", (req, res) => {
-  delete urlDatabase[req.params.id];
-  res.redirect("/urls")
-}); 
-
-app.put("/urls/:id", (req, res) => {
-  urlDatabase[req.params.id].fullLink  = req.body.longURL;
-  res.redirect("/urls");
-}); 
-
+// access link edit page
 app.get("/urls/:id", (req, res) => {
   if (req.session.user_id === urlDatabase[req.params.id].owner) {
     res.render("urls_show", {
@@ -239,38 +236,62 @@ app.get("/urls/:id", (req, res) => {
   }
 });
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
+// save link edit
+// app.post("/urls/:id", (req, res) => {
+//   urlDatabase[req.params.id].fullLink  = "http://" + req.body.longURL;
+//   res.redirect("/urls");
+// }); 
+
+// save link edits
+app.put("/urls/:id", (req, res) => {
+  urlDatabase[req.params.id].fullLink  = saveLink(req.body.longURL);
+  res.redirect("/urls");
+}); 
+
+app.delete("/urls/:id", (req, res) => {
+  delete urlDatabase[req.params.id];
+  res.redirect("/urls")
+}); 
+
 
 app.get("/urls", (req, res) => {
   res.render("urls_index")
 });
 
+
 app.post("/urls", (req, res) => {
   var newLink = returnRandomString(urlDatabase);
   urlDatabase[newLink] = {
-    fullLink: req.body.longURL, 
+    fullLink: saveLink(req.body.longURL), 
     owner: req.session.user_id,
     visits: [] };
   res.redirect(302, "/urls/" + newLink);
 });
 
-
+// redirect short urls to long ones
 app.get("/u/:shortURL", (req, res) => {
+  const shortlink = req.params.shortURL;
   if (!req.session.visitor_id) {
       req.session.visitor_id = generateRandomString(linkVisitors);
       linkVisitors[req.session.visitor_id] = 0;
   }
   linkVisitors[req.session.visitor_id]++;
-  let longURL = urlDatabase[req.params.shortURL].fullLink;
-  urlDatabase[req.params.shortURL].visits.push(
+
+  let longURL = urlDatabase[shortlink].fullLink;
+  urlDatabase[shortlink].visits.push(
     {
-      visitor: req.session.visitor_id, time: Date.now()
+      visitor: req.session.visitor_id, time: moment().utcOffset("-07:00").format("dddd, MMMM Do YYYY, h:mm:ss a")
     }
   );
   res.redirect(longURL);
 });
+
+app.get("/urls.json", (req, res) => {
+  res.json(urlDatabase);
+});
+
+
+
 
 app.listen(PORT, () => {
   console.log(`Tiny App listening on port ${PORT}!`);

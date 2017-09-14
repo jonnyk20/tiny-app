@@ -8,19 +8,40 @@
       <header>
         <%include ./partials/_header %>
       </header>
-        <h4>Tiny Url: <a href="/u/<%= link %>"><%= link %></a> <h4> 
-        <div>Visits: <%= linkObject.visits.length %> </div>
-        <div>visitors:  <%= unique %></div>
-        <form action="/urls/<%= link %>?_method=PUT" method="POST" style="">
-          <label for="longURL">Edit url: </label>
+
+        <div class="row">
+          <div clas="col-sm-3">
+            <h4 class="inline">Tiny Url: <a href="/u/<%= link %>"><%= link %></a> <h4> 
+          </div>
+          <div clas="col-sm-3">
+            <div class="inline">Visits: <%= linkObject.visits.length %> </div>
+          </div>
+          <div clas="col-sm-3">
+            <div>visitors:  <%= unique %></div>
+          </div>
+          <div clas="col-sm-3">
+            <form method="POST" class="float-right" action="/urls/<%= link %>?_method=DELETE">
+              <button class="btn btn-default btn-sm" type="submit">Delete Link</button>
+            </form>
+          </div>
+        </div>
+
+
+
+        <form action="/urls/<%= link %>?_method=PUT" method="POST" class="dark-blue form-control">
           <input id="longURL" type="text" name="longURL" value="<%= linkObject.fullLink  %>" style="width: 300px">
-          <input type="submit" value="update">
+          <button type="submit" class="btn btn-primary btn-sm"> Change URL </button>
         </form>
 
-        <form method="POST" action="/urls/<%= link %>?_method=DELETE">
-          <button type="submit">Delete Link</button>
-        </form>
+
         <h4> Visits </h4>
+
+
+
+
+
+
+        
         <ul>
         <% linkObject.visits.forEach(function(visit) { %> 
           <li>

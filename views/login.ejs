@@ -8,17 +8,16 @@
       <header>
         <%include ./partials/_header %>
       </header>
-        <h1> Please Login here </h1>
-        <form action="/login" method="POST" style="">
-
-        <label for="email">Enter your email:</label>
-        <input id="email" type="email" name="email" placeholder="email@email.com" style="width: 100px">
         
-        <label for="password">Enter your password:</label>
-        <input id="password" type="password" name="password" style="width: 100px">
-
-        <input type="submit" value="Login">
-      </form>
+        <form action="/login" method="POST" class="form-control dark-blue">
+          <h4 class="dark-blue text-default"> Please Login here </h4>
+          <label for="email">Email:</label>
+          <input id="email" type="email" name="email" placeholder="email@email.com" style="width: 100px">
+          
+          <label for="password">Password:</label>
+          <input id="password" type="password" name="password" style="width: 100px">
+          <button type="submit" class="btn btn-primary btn-sm"> Log In </button>
+        </form>
     </div>
   </body>
 </html>

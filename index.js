@@ -3,6 +3,7 @@ var express = require("express");
 var cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
 var methodOverride = require('method-override');
+const moment = require('moment');
 
 var app = express();
 var PORT = process.env.PORT || 8080;

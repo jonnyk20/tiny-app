@@ -20,7 +20,7 @@
   <a href="/urls/<%= link %>">
     Edit Link
   </a>
-  <form method="POST" action="/urls/<%= link %>/delete">
+  <form method="POST" action="/urls/<%= link %>?_method=DELETE">
   <input type="submit" value="Delete">
   </form>
   </li>

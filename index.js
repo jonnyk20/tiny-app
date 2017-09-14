@@ -2,6 +2,7 @@ var express = require("express");
 //var cookieParser = require('cookie-parser');
 var cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
+var methodOverride = require('method-override');
 
 var app = express();
 var PORT = process.env.PORT || 8080;
@@ -9,9 +10,32 @@ var PORT = process.env.PORT || 8080;
 app.set("view engine", "ejs");
 
 var urlDatabase = {
-  "b2xVn2": {fullLink: "http://www.lighthouselabs.ca", owner: "userRandomID"},
-  "9sm5xK": {fullLink: "http://www.google.com", owner: "user2RandomID"},
-  "123abc": {fullLink: "http://www.canada.com", owner: "jonjon"}
+  "b2xVn2": {
+    fullLink: "http://www.lighthouselabs.ca", 
+    owner: "userRandomID",
+    visits: []
+  },
+   "9sm5xK": {
+    fullLink: "http://www.google.com", 
+    owner: "user2RandomID",
+    visits: []
+  },
+  "123abc": {fullLink: "http://www.canada.com", 
+    owner: "jonjon",
+    visits: [{
+              visitor: "visitor1",
+              time: 1505347209656
+              },
+              {
+                visitor: "visitor1",
+                time: 1505347209699  
+              },
+              {
+                visitor: "visitor2",
+                time: 1505347209814  
+              },
+    ]
+  }
 };
 
 const users = { 
@@ -56,6 +80,16 @@ function urlsForUser(id){
   return filteredUrs;
 }
 
+function countUniqueVisitors(link){
+  const uniqueVisitors = [];
+  for (visit of urlDatabase[link].visits){
+    if (!uniqueVisitors.includes(visit['visitor'])) {
+      uniqueVisitors.push(visit['visitor']);
+    }
+  }
+  return uniqueVisitors.length;
+}
+
 function returnRandomString(database){
   return generateRandomString(database);
 }
@@ -88,11 +122,10 @@ for (let user in users){
   users[user].password = bcrypt.hashSync(users[user].password, 10);
 }
 
-
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
-//app.use(cookieParser());
+app.use(methodOverride('_method'));
 
 app.use(cookieSession({
   name: 'session',
@@ -127,8 +160,6 @@ app.post("/login", (req, res) => {
   let emailEntered = req.body.email;
   let idFound = findUserByEmail(emailEntered);
   let pwEntered = req.body.password;
-  // console.log("Stored Password", users[idFound].password);
-  // console.log("Entered Password", users[idFound].password);
   if ( idFound && 
     ( bcrypt.compareSync(pwEntered, users[idFound].password))
     ){
@@ -166,6 +197,8 @@ app.post("/register", (req, res) => {
   }
 });
 
+
+
 app.get("/urls/new", (req, res) => {
   if (req.session.user_id &&
       users[req.session.user_id]
@@ -176,12 +209,17 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
-app.post("/urls/:id/delete", (req, res) => {
-  delete urlDatabase[req.params.id];
+app.post("/urls/:id", (req, res) => {
+  urlDatabase[req.params.id].fullLink  = req.body.longURL;
   res.redirect("/urls");
 }); 
 
-app.post("/urls/:id", (req, res) => {
+app.delete("/urls/:id", (req, res) => {
+  delete urlDatabase[req.params.id];
+  res.redirect("/urls")
+}); 
+
+app.put("/urls/:id", (req, res) => {
   urlDatabase[req.params.id].fullLink  = req.body.longURL;
   res.redirect("/urls");
 }); 
@@ -189,8 +227,9 @@ app.post("/urls/:id", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   if (req.session.user_id === urlDatabase[req.params.id].owner) {
     res.render("urls_show", {
-      urlDatabase: urlDatabase,
-      selected: req.params.id
+      link: req.params.id,
+      linkObject: urlDatabase[req.params.id],
+      unique: countUniqueVisitors(req.params.id)
     });
   } else {
     res.end("only link owner can edit")
@@ -202,19 +241,26 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  // var filteredUrls = urlsForUser(req.cookies['user_id']);
   res.render("urls_index")
 });
 
 app.post("/urls", (req, res) => {
   var newLink = returnRandomString(urlDatabase);
-  urlDatabase[newLink] = {fullLink: req.body.longURL, owner: req.session.user_id };
+  urlDatabase[newLink] = {
+    fullLink: req.body.longURL, 
+    owner: req.session.user_id,
+    visits: [] };
   res.redirect(302, "/urls/" + newLink);
 });
 
 
 app.get("/u/:shortURL", (req, res) => {
   let longURL = urlDatabase[req.params.shortURL].fullLink;
+  urlDatabase[req.params.shortURL].visits.push(
+    {
+      visitor: "visitor1", date: Date.now()
+    }
+  );
   res.redirect(longURL);
 });
 

@@ -1,16 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-  <% include ./partials/_head %>
+    <% include ./partials/_head %>
   </head>
   <body style="font-size:20px; padding:50px;">
-    <header>
-      <%include ./partials/_header %>
-    </header>
-    <form action="/urls" method="POST" style="margin:150px;">
-      <label for="longURL">Enter a url:</label>
-      <input id="longURL" type="text" name="longURL" placeholder="http://" style="width: 300px">
-      <input type="submit" value="Submit">
-    </form>
+    
+    <div class="container">
+      <header>
+        <%include ./partials/_header %>
+      </header>
+        <div clas="col-md-8">
+          <form action="/urls" method="POST" class="form-control dark-blue">
+            <label for="longURL">Enter a url:</label>
+            <input id="longURL" type="text" name="longURL" placeholder="website.com" style="width: 300px">
+            <button type="submit" class="btn btn-primary btn-sm"> Shorten </button>
+          </form>
+        </div>
+    </div>
+
   </body>
 </html>

@@ -9,26 +9,45 @@
     <header>
       <%include ./partials/_header %>
     </header>
-    <h2>Links</h2>
     <div>
-      <a href="/urls/new"><button>Create New Link</button></a>
+      <h2 class="dark-blue index-header">My Links</h2>
+      <a href="/urls/new" class="float-right"><button class="btn btn-success btn-sm">Create New Link</button></a>
     </div>
-    <ul>
-      <% Object.keys(urlDatabase).forEach(function(link) { %> 
-      <li>
-        <a href="/u/<%= link %>">
-          <%= link %> - <%= urlDatabase[link].fullLink %> (<%= urlDatabase[link].owner %>)
-        </a>
-        &nbsp;&nbsp;
-        <a href="/urls/<%= link %>">
-          Edit Link
-        </a>
-        <form method="POST" action="/urls/<%= link %>?_method=DELETE">
-          <input type="submit" value="Delete">
-        </form>
-      </li>
-      <% }); %>
-    </ul>
+    <div class="card">
+      <table class="table">
+        <thead>
+          <tr class="dark-blue">
+            <th>Short link </th>
+            <th>Full URL</th>
+            <th> Modify</th>
+          <tr>
+        </thead>
+        <tbody>
+        <% Object.keys(urlDatabase).forEach(function(link) { %> 
+          <tr>
+            <td>
+              <a href="/u/<%= link %>" class="dark-blue">
+                <%= link %> %> 
+              </a>
+            </td>
+            <td>
+              <a href="/u/<%= link %>" class="dark-blue">
+                <%= urlDatabase[link].fullLink %> 
+              </a>
+            </td>
+            <td>
+              <a href="/urls/<%= link %>">
+                <button class="btn btn-primary btn-sm"> Edit </button>
+              </a>
+              <form method="POST" action="/urls/<%= link %>?_method=DELETE">
+              <button type="submit" class="btn btn-default btn-sm"> Delete</button>
+              </form>
+            </td>
+          <tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
   </div>
 </body>
 </html>

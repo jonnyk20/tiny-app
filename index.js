@@ -236,11 +236,7 @@ app.get("/urls/:id", (req, res) => {
   }
 });
 
-// save link edit
-// app.post("/urls/:id", (req, res) => {
-//   urlDatabase[req.params.id].fullLink  = "http://" + req.body.longURL;
-//   res.redirect("/urls");
-// }); 
+
 
 // save link edits
 app.put("/urls/:id", (req, res) => {

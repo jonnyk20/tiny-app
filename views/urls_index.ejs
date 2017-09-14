@@ -17,23 +17,35 @@
       <table class="table">
         <thead>
           <tr class="dark-blue">
-            <th>Short link </th>
+            <th>Short link</th>
             <th>Full URL</th>
+            <th>Created</th>
+            <th>Visits</th>
+            <th>Visitors</th>
             <th> Modify</th>
           <tr>
         </thead>
         <tbody>
         <% Object.keys(urlDatabase).forEach(function(link) { %> 
-          <tr>
+          <tr class="dark-blue">
             <td>
               <a href="/u/<%= link %>" class="dark-blue">
-                <%= link %> %> 
+                <%= link %>  
               </a>
             </td>
             <td>
               <a href="/u/<%= link %>" class="dark-blue">
                 <%= urlDatabase[link].fullLink %> 
               </a>
+            </td>
+            <td>
+              <%= urlDatabase[link].created %> 
+            </td>
+            <td>
+              <%= urlDatabase[link].visits.length %>
+            </td>
+            <td>
+              <%= uniqueVisits[link] %>
             </td>
             <td>
               <a href="/urls/<%= link %>">

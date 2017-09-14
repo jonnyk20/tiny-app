@@ -16,14 +16,16 @@ const urlDatabase = {
   "b2xVn2": {
     fullLink: "http://www.lighthouselabs.ca", 
     owner: "userRandomID",
-    visits: []
+    visits: [],
+    created: "Wednesday, September 13th 2017, 9:34:44 pm"
   },
    "9sm5xK": {
     fullLink: "http://www.google.com", 
     owner: "user2RandomID",
-    visits: []
+    visits: [],
+    created: "Wednesday, September 13th 2017, 9:34:44 pm"
   },
-  "123abc": {fullLink: "http://www.canada.com", 
+  "123abc": {fullLink: "http://www.example.com", 
     owner: "jonjon",
     visits: [{
               visitor: "visitor1",
@@ -37,7 +39,8 @@ const urlDatabase = {
                 visitor: "visitor2",
                 time: "Thursday, September 14th 2017, 5:28:19 am"
               },
-    ]
+    ],
+    created: "Wednesday, September 13th 2017, 9:34:44 pm"
   }
 };
 
@@ -153,7 +156,11 @@ app.use(function (request, response, next) {
 
 
 app.get("/", (req, res) => {
-  res.redirect("/urls");
+  if (req.session.user_id) {
+    res.redirect("/urls");
+  } else {
+    res.redirect("/login");
+  }
 });
 
 // access registration page
@@ -212,7 +219,7 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");  
 });
 
-// access link-creation page
+// access url-creation page
 app.get("/urls/new", (req, res) => {
   if (req.session.user_id &&
       users[req.session.user_id]
@@ -223,7 +230,7 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
-// access link edit page
+// access urledit page
 app.get("/urls/:id", (req, res) => {
   if (req.session.user_id === urlDatabase[req.params.id].owner) {
     res.render("urls_show", {
@@ -238,41 +245,56 @@ app.get("/urls/:id", (req, res) => {
 
 
 
-// save link edits
+// save url edits
 app.put("/urls/:id", (req, res) => {
   urlDatabase[req.params.id].fullLink  = saveLink(req.body.longURL);
   res.redirect("/urls");
 }); 
 
+// delete url
 app.delete("/urls/:id", (req, res) => {
   delete urlDatabase[req.params.id];
   res.redirect("/urls")
 }); 
 
 
+// urls index page
 app.get("/urls", (req, res) => {
-  res.render("urls_index")
+  let uniqueVisits = {};
+  for (url in urlDatabase){
+    uniqueVisits[url] = countUniqueVisitors(url);
+  }
+  res.render("urls_index", {
+    uniqueVisits: uniqueVisits
+  })
 });
 
-
+// create url
 app.post("/urls", (req, res) => {
   var newLink = returnRandomString(urlDatabase);
   urlDatabase[newLink] = {
     fullLink: saveLink(req.body.longURL), 
     owner: req.session.user_id,
-    visits: [] };
+    visits: [],
+    created: moment().utcOffset("-07:00").format("dddd, MMMM Do YYYY, h:mm:ss a")
+  };
   res.redirect(302, "/urls/" + newLink);
 });
 
 // redirect short urls to long ones
 app.get("/u/:shortURL", (req, res) => {
   const shortlink = req.params.shortURL;
+
+  // create new visitor ID if it's not there
   if (!req.session.visitor_id) {
       req.session.visitor_id = generateRandomString(linkVisitors);
       linkVisitors[req.session.visitor_id] = 0;
   }
+
+  // add 1 do visitor id session count
   linkVisitors[req.session.visitor_id]++;
 
+  // push session info into urlDatabase
   let longURL = urlDatabase[shortlink].fullLink;
   urlDatabase[shortlink].visits.push(
     {
@@ -282,6 +304,7 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
+// make url data available as JSOn
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });

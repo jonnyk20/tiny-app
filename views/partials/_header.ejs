@@ -1,9 +1,9 @@
 
 <nav class="navbar navbar-light bg-faded">
   <a class="navbar-brand" href="#">
-    <i class="fa fa-code dark-blue" aria-hidden="true"></i>
+    <i class="fa fa-home dark-blue" aria-hidden="true"></i>
     </a>
-    <a href="/" class="float-left"> <h1 class="dark-blue"> TinyApp </h1> <a>
+    <a href="/" class="float-left clear-hover"> <h1 class="dark-blue"> TinyApp </h1> <a>
         <% if(user){ %>
       <span class="header-div dark-blue"> User: <%= user.email %></span>
       <form action="/logout" method="POST" class="auth-button">
@@ -11,10 +11,10 @@
       </form>
     <% } else{ %>  
       
-      <div>
+      <div class="dark-blue" >
         <span> Please Login or Register </span>
-        <a href="/register"> <button class="btn btn-default btn-sm"> Register </button> <a>
-        <a href="/login"> <button class="btn btn-default btn-sm"> Log In </button> <a>
+        <a href="/register" class="clear-hover"> <button class="btn btn-default btn-sm"> Register </button> <a>
+        <a href="/login" class="clear-hover"> <button class="btn btn-default btn-sm"> Log In </button> <a>
       </div>
     <% } %>
   </a>

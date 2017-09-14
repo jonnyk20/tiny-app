@@ -4,17 +4,18 @@
     <% include ./partials/_head %>
   </head>
   <body>
-    <div class="container">
+    <div class="container dark-blue">
       <header>
         <%include ./partials/_header %>
       </header>
-      <h1> Please Register here </h1>
-       <form action="/register" method="POST" style="" class="form-control">
-        <label for="email">Enter your email:</label>
-        <input id="email" type="emailt" name="email" placeholder="email@email.com" style="width: 100px">
-        <label for="password">Choose a password:</label>
-        <input id="password" type="password" name="password" style="width: 100px">
-        <button type="submit" class="btn btn-primary">Register</button>
+      
+       <form action="/register" method="POST" style="" class="form-control dark-blue">
+        <h3> Please Register here </h3>
+        <label for="email">Email:</label>
+        <input id="email" type="emailt" name="email" placeholder="email@email.com" style="width: 200px">
+        <label for="password">Password:</label>
+        <input id="password" type="password" name="password" style="width: 200px">
+        <button type="submit" class="btn btn-primary btn-sm">Register</button>
       </form>
     </div>
   </body>

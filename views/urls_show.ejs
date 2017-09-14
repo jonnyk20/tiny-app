@@ -9,14 +9,14 @@
         <%include ./partials/_header %>
       </header>
 
-        <div class="row">
-          <div class="col-sm-3">
-            <h4 class="inline">Tiny Url: <a href="/u/<%= link %>"><%= link %></a> <h4> 
+        <div class="row dark-blue">
+          <div class="col-sm-3 stat">
+            <h4 class="inline">Minified Url: <a href="/u/<%= link %>"><%= link %></a> <h4> 
           </div>
-          <div class="col-sm-3">
+          <div class="col-sm-3 stat">
             <div class="inline">Visits: <%= linkObject.visits.length %> </div>
           </div>
-          <div class="col-sm-3">
+          <div class="col-sm-3 stat">
             <div>visitors:  <%= unique %></div>
           </div>
           <div class="col-sm-3">
@@ -29,12 +29,12 @@
 
 
         <form action="/urls/<%= link %>?_method=PUT" method="POST" class="dark-blue form-control">
-          <input id="longURL" type="text" name="longURL" value="<%= linkObject.fullLink  %>" style="width: 300px">
+          <input id="longURL" type="text" class="dark-blue" name="longURL" value="<%= linkObject.fullLink  %>" style="width: 300px">
           <button type="submit" class="btn btn-primary btn-sm"> Change URL </button>
         </form>
 
 
-        <h4> Visits </h4>
+     
 
         <table class="table">
           <thead>
@@ -45,8 +45,8 @@
           </thead>
           <tbody>
             <% linkObject.visits.forEach(function(visit) { %> 
-              <tr>
-                <td>
+              <tr class="dark-blue">
+                <td >
                   <%= visit.visitor %>
                 </td>
                 <td>
@@ -60,14 +60,6 @@
 
 
 
-
-        <ul>
-        <% linkObject.visits.forEach(function(visit) { %> 
-          <li>
-          <%= visit.visitor %> - <%= visit.time %> 
-          </li>
-          <% }); %>
-        </ul>
     </div>
   </body>
 </html>

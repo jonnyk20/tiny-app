@@ -10,16 +10,16 @@
       </header>
 
         <div class="row">
-          <div clas="col-sm-3">
+          <div class="col-sm-3">
             <h4 class="inline">Tiny Url: <a href="/u/<%= link %>"><%= link %></a> <h4> 
           </div>
-          <div clas="col-sm-3">
+          <div class="col-sm-3">
             <div class="inline">Visits: <%= linkObject.visits.length %> </div>
           </div>
-          <div clas="col-sm-3">
+          <div class="col-sm-3">
             <div>visitors:  <%= unique %></div>
           </div>
-          <div clas="col-sm-3">
+          <div class="col-sm-3">
             <form method="POST" class="float-right" action="/urls/<%= link %>?_method=DELETE">
               <button class="btn btn-default btn-sm" type="submit">Delete Link</button>
             </form>
@@ -36,12 +36,31 @@
 
         <h4> Visits </h4>
 
+        <table class="table">
+          <thead>
+            <tr class="dark-blue">
+              <th>Visitor</th>
+              <th>Time</th>
+            <tr>
+          </thead>
+          <tbody>
+            <% linkObject.visits.forEach(function(visit) { %> 
+              <tr>
+                <td>
+                  <%= visit.visitor %>
+                </td>
+                <td>
+                  <%= visit.time %>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
 
 
 
 
 
-        
         <ul>
         <% linkObject.visits.forEach(function(visit) { %> 
           <li>

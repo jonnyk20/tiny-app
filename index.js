@@ -38,6 +38,8 @@ var urlDatabase = {
   }
 };
 
+const linkVisitors = {};
+
 const users = { 
   "userRandomID": {
     id: "userRandomID", 
@@ -255,10 +257,15 @@ app.post("/urls", (req, res) => {
 
 
 app.get("/u/:shortURL", (req, res) => {
+  if (!req.session.visitor_id) {
+      req.session.visitor_id = generateRandomString(linkVisitors);
+      linkVisitors[req.session.visitor_id] = 0;
+  }
+  linkVisitors[req.session.visitor_id]++;
   let longURL = urlDatabase[req.params.shortURL].fullLink;
   urlDatabase[req.params.shortURL].visits.push(
     {
-      visitor: "visitor1", date: Date.now()
+      visitor: req.session.visitor_id, time: Date.now()
     }
   );
   res.redirect(longURL);

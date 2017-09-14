@@ -1,23 +1,33 @@
-<% include partials/_header %>
-<h4>Tiny Url: <a href="/u/<%= link %>"><%= link %></a> <h4> 
-<div>Visits: <%= linkObject.visits.length %> </div>
-<div>visitors:  <%= unique %></div>
-<form action="/urls/<%= link %>?_method=PUT" method="POST" style="">
-  <label for="longURL">Edit url: </label>
-  <input id="longURL" type="text" name="longURL" value="<%= linkObject.fullLink  %>" style="width: 300px">
-  <input type="submit" value="update">
-</form>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <% include ./partials/_head %>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <%include ./partials/_header %>
+      </header>
+        <h4>Tiny Url: <a href="/u/<%= link %>"><%= link %></a> <h4> 
+        <div>Visits: <%= linkObject.visits.length %> </div>
+        <div>visitors:  <%= unique %></div>
+        <form action="/urls/<%= link %>?_method=PUT" method="POST" style="">
+          <label for="longURL">Edit url: </label>
+          <input id="longURL" type="text" name="longURL" value="<%= linkObject.fullLink  %>" style="width: 300px">
+          <input type="submit" value="update">
+        </form>
 
-<form method="POST" action="/urls/<%= link %>?_method=DELETE">
-  <button type="submit">Delete Link</button>
-</form>
-
-<h4> Visits </h4>
-<ul>
-<% linkObject.visits.forEach(function(visit) { %> 
-  <li>
-  <%= visit.visitor %> - <%= visit.time %> 
-
-  </li>
-  <% }); %>
-  </ul>
+        <form method="POST" action="/urls/<%= link %>?_method=DELETE">
+          <button type="submit">Delete Link</button>
+        </form>
+        <h4> Visits </h4>
+        <ul>
+        <% linkObject.visits.forEach(function(visit) { %> 
+          <li>
+          <%= visit.visitor %> - <%= visit.time %> 
+          </li>
+          <% }); %>
+        </ul>
+    </div>
+  </body>
+</html>

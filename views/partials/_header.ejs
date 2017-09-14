@@ -1,15 +1,28 @@
-<div> TinyApp </div>
 
-
-<% if(user){ %>
-  <div> Logged in As: <%= user.email %></div>
-  <form action="/logout" method="POST" style="">
-    <input type="submit" value="Logout">
-  </form>
-<% } else{ %>  
-  <div> Please Login or Register
-   <a href="/login"> <button> Login </button> <a>
-   <a href="/register"> <button> Register </button> <a>
+<div class="row">
+  
+  <div class="col-lg-4">
+    <a href="/"><div> TinyApp </div><a>
+    <span id="logo"> Logo </span>
   </div>
-<% } %>
 
+
+
+  <div class="col-lg-8">
+    <% if(user){ %>
+      <span> Logged in As: <%= user.email %></span>
+      <form action="/logout" method="POST" style="">
+        <input type="submit" value="Logout">
+      </form>
+    <% } else{ %>  
+      <span> Please Login or Register </span>
+      <a href="/login"> <button> Login </button> <a>
+      <a href="/register"> <button> Register </button> <a>
+      
+    <% } %>
+
+  </div>
+
+</div>
+
+<hr>

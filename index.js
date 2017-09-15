@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt');
 const methodOverride = require('method-override');
 const moment = require('moment');
 const bodyParser = require("body-parser");
+var path = require('path');
 
 var app = express();
 var PORT = process.env.PORT || 8080;
@@ -68,7 +69,7 @@ const users = {
 
 function checkAuth(req, res, next) {
   if (!req.session.user_id) {
-    res.render("forbidden");
+    res.render("no-auth");
   } else {
     next();
   }
@@ -208,10 +209,10 @@ app.post("/register", (req, res) => {
     let newPassword = req.body.password;
     if (newEmail == '' || newPassword == '') {
       res.statusCode = 400;
-      res.end("email or password field empty");
+      res.render("field-empty");
     } else if (findUserByEmail(newEmail)) {
       res.statusCode = 400;
-      res.end("Email already in use");
+      res.render("email-taken");
     }
   
     else {

@@ -76,12 +76,21 @@ function checkAuth(req, res, next) {
 
 function matchAuth(req, res, next) {
   if (req.session.user_id !== urlDatabase[req.params.id].owner) {
+    res.statusCode = 401;
     res.render("wrong-user");
   } else {
     next();
   }
 }
 
+function checkURL(req, res, next){
+  if (!urlDatabase[req.params.id]){
+    res.statusCode = 404;
+    res.render("unknown-url");
+  } else {
+    next();
+  }
+}
 function findUserByEmail(enteredEmail){
   var userID;
   for (user in users){
@@ -162,9 +171,9 @@ app.use(cookieSession({
 }))
 
 //pass login cookie and urlDatabase to templates using local variables
-app.use(function (request, response, next) {
-  const userID = request.session.user_id
-  response.locals = {
+app.use(function (req, res, next) {
+  const userID = req.session.user_id
+  res.locals = {
     urlDatabase: urlsForUser(userID), 
     user: users[userID]
   };
@@ -261,46 +270,29 @@ app.get("/urls/new", checkAuth, (req, res) => {
 });
 
 // access url edit page
-app.get("/urls/:id", checkAuth, matchAuth, (req, res) => {
-  if (!urlDatabase[req.params.id]){
-    res.render("unknown-url");
-  } else if (!req.session.user_id){
-    res.render("forbidden");
-  } else if(req.session.user_id === urlDatabase[req.params.id].owner) {
+app.get("/urls/:id", checkURL, checkAuth, matchAuth, (req, res) => {
     res.render("urls_show", {
       link: req.params.id,
       linkObject: urlDatabase[req.params.id],
       unique: countUniqueVisitors(req.params.id)
     });
-  } else {
-    res.statusCode = 401;
-    //res.render("wrong-user");
-    res.end("wrong-user")
-  }
 });
 
-
-
 // save url edits
-app.put("/urls/:id", checkAuth, (req, res) => {
-  if (!req.session.user_id === urlDatabase[req.params.id].owner){
-    res.render("wrong-user");
-  } else {
-    urlDatabase[req.params.id].fullLink  = saveLink(req.body.longURL);
-    res.redirect("/urls");
-  }
+app.put("/urls/:id", checkAuth, matchAuth, (req, res) => {
+  urlDatabase[req.params.id].fullLink  = saveLink(req.body.longURL);
+  res.redirect("/urls");
 }); 
 
 // delete url
-app.delete("/urls/:id", (req, res) => {
+app.delete("/urls/:id", checkAuth, matchAuth, (req, res) => {
   delete urlDatabase[req.params.id];
   res.redirect("/urls")
 }); 
 
 
 // urls index page
-app.get("/urls", (req, res) => {
-  if (req.session.user_id){
+app.get("/urls", checkAuth, (req, res) => {
     let uniqueVisits = {};
     for (url in urlDatabase){
       uniqueVisits[url] = countUniqueVisitors(url);
@@ -308,16 +300,11 @@ app.get("/urls", (req, res) => {
     res.render("urls_index", {
       uniqueVisits: uniqueVisits
     })
-  } else {
-    res.render("forbidden");
-  }
 });
 
 // create url
-app.post("/urls", (req, res) => {
-  if (!req.session.user_id){
-    res.render("forbidden")
-  } else if (!req.body.longURL){
+app.post("/urls", checkAuth,(req, res) => {
+  if (!req.body.longURL){
     res.end("Invalid input");
   } else{
       var newLink = returnRandomString(urlDatabase);
@@ -332,8 +319,8 @@ app.post("/urls", (req, res) => {
 });
 
 // redirect short urls to long ones
-app.get("/u/:shortURL", (req, res) => {
-  const shortlink = req.params.shortURL;
+app.get("/u/:id", checkURL, (req, res) => {
+  const shortlink = req.params.id;
   if (!urlDatabase[shortlink]){
     res.render("unknown-url");
   } else {

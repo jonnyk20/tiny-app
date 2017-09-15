@@ -192,7 +192,7 @@ app.get("/register", (req, res) => {
 
 // register new user
 app.post("/register", (req, res) => {
-  if (request.session.user_id){
+  if (req.session.user_id){
     res.redirect("/urls")
   }  else {
     let newEmail = req.body.email;

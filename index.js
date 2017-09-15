@@ -65,6 +65,23 @@ const users = {
 }
 
 // helper functions
+
+function checkAuth(req, res, next) {
+  if (!req.session.user_id) {
+    res.render("forbidden");
+  } else {
+    next();
+  }
+}
+
+function matchAuth(req, res, next) {
+  if (req.session.user_id !== urlDatabase[req.params.id].owner) {
+    res.render("wrong-user");
+  } else {
+    next();
+  }
+}
+
 function findUserByEmail(enteredEmail){
   var userID;
   for (user in users){
@@ -165,36 +182,49 @@ app.get("/", (req, res) => {
 
 // access registration page
 app.get("/register", (req, res) => {
-  res.render("register");
+  if (req.session.user_id){
+    res.redirect("/urls")
+  } else {
+    res.render("register");
+  }
+  
 });
 
 // register new user
 app.post("/register", (req, res) => {
-  let newEmail = req.body.email;
-  let newPassword = req.body.password;
-  if (newEmail == '' || newPassword == '') {
-    res.statusCode = 400;
-    res.end("email or password field empty");
-  } else if (findUserByEmail(newEmail)) {
-    res.statusCode = 400;
-    res.end("Email already in use");
-  }
-
-  else {
-  let newID = returnRandomString(users);
-  users[newID] = {
-    id: newID, 
-    email: newEmail, 
-    password: bcrypt.hashSync(newPassword, 10)  
-  };
-  req.session.user_id = newID;
-  res.redirect("/urls");
+  if (request.session.user_id){
+    res.redirect("/urls")
+  }  else {
+    let newEmail = req.body.email;
+    let newPassword = req.body.password;
+    if (newEmail == '' || newPassword == '') {
+      res.statusCode = 400;
+      res.end("email or password field empty");
+    } else if (findUserByEmail(newEmail)) {
+      res.statusCode = 400;
+      res.end("Email already in use");
+    }
+  
+    else {
+    let newID = returnRandomString(users);
+    users[newID] = {
+      id: newID, 
+      email: newEmail, 
+      password: bcrypt.hashSync(newPassword, 10)  
+    };
+    req.session.user_id = newID;
+    res.redirect("/urls");
+    }
   }
 });
 
 // access login page
 app.get("/login", (req, res) => {
+  if (req.session.user_id){
+    res.redirect("/urls")
+  }  else {
   res.render("login");
+  }
 });
 
 // log in
@@ -209,7 +239,7 @@ app.post("/login", (req, res) => {
     res.redirect("/urls");
   } else {
     res.statusCode = 400;
-    res.end("Incorrect username or password")
+    res.render("wrong-login");
   }
 });
 
@@ -220,7 +250,7 @@ app.post("/logout", (req, res) => {
 });
 
 // access url-creation page
-app.get("/urls/new", (req, res) => {
+app.get("/urls/new", checkAuth, (req, res) => {
   if (req.session.user_id &&
       users[req.session.user_id]
       ){
@@ -231,7 +261,7 @@ app.get("/urls/new", (req, res) => {
 });
 
 // access url edit page
-app.get("/urls/:id", (req, res) => {
+app.get("/urls/:id", checkAuth, matchAuth, (req, res) => {
   if (!urlDatabase[req.params.id]){
     res.render("unknown-url");
   } else if (!req.session.user_id){
@@ -244,16 +274,21 @@ app.get("/urls/:id", (req, res) => {
     });
   } else {
     res.statusCode = 401;
-    res.render("wrong-user");
+    //res.render("wrong-user");
+    res.end("wrong-user")
   }
 });
 
 
 
 // save url edits
-app.put("/urls/:id", (req, res) => {
-  urlDatabase[req.params.id].fullLink  = saveLink(req.body.longURL);
-  res.redirect("/urls");
+app.put("/urls/:id", checkAuth, (req, res) => {
+  if (!req.session.user_id === urlDatabase[req.params.id].owner){
+    res.render("wrong-user");
+  } else {
+    urlDatabase[req.params.id].fullLink  = saveLink(req.body.longURL);
+    res.redirect("/urls");
+  }
 }); 
 
 // delete url
@@ -280,37 +315,46 @@ app.get("/urls", (req, res) => {
 
 // create url
 app.post("/urls", (req, res) => {
-  var newLink = returnRandomString(urlDatabase);
-  urlDatabase[newLink] = {
-    fullLink: saveLink(req.body.longURL), 
-    owner: req.session.user_id,
-    visits: [],
-    created: moment().utcOffset("-07:00").format("dddd, MMMM Do YYYY, h:mm:ss a")
-  };
-  res.redirect(302, "/urls/" + newLink);
+  if (!req.session.user_id){
+    res.render("forbidden")
+  } else if (!req.body.longURL){
+    res.end("Invalid input");
+  } else{
+      var newLink = returnRandomString(urlDatabase);
+      urlDatabase[newLink] = {
+        fullLink: saveLink(req.body.longURL), 
+        owner: req.session.user_id,
+        visits: [],
+        created: moment().utcOffset("-07:00").format("dddd, MMMM Do YYYY, h:mm:ss a")
+      };
+      res.redirect(302, "/urls/" + newLink);
+  }
 });
 
 // redirect short urls to long ones
 app.get("/u/:shortURL", (req, res) => {
   const shortlink = req.params.shortURL;
+  if (!urlDatabase[shortlink]){
+    res.render("unknown-url");
+  } else {
+      // create new visitor ID if it's not there
+      if (!req.session.visitor_id) {
+        req.session.visitor_id = generateRandomString(linkVisitors);
+        linkVisitors[req.session.visitor_id] = 0;
+      }
 
-  // create new visitor ID if it's not there
-  if (!req.session.visitor_id) {
-      req.session.visitor_id = generateRandomString(linkVisitors);
-      linkVisitors[req.session.visitor_id] = 0;
+    // add 1 do visitor id session count
+    linkVisitors[req.session.visitor_id]++;
+
+    // push session info into urlDatabase
+    let longURL = urlDatabase[shortlink].fullLink;
+    urlDatabase[shortlink].visits.push(
+      {
+        visitor: req.session.visitor_id, time: moment().utcOffset("-07:00").format("dddd, MMMM Do YYYY, h:mm:ss a")
+      }
+    );
+    res.redirect(longURL);
   }
-
-  // add 1 do visitor id session count
-  linkVisitors[req.session.visitor_id]++;
-
-  // push session info into urlDatabase
-  let longURL = urlDatabase[shortlink].fullLink;
-  urlDatabase[shortlink].visits.push(
-    {
-      visitor: req.session.visitor_id, time: moment().utcOffset("-07:00").format("dddd, MMMM Do YYYY, h:mm:ss a")
-    }
-  );
-  res.redirect(longURL);
 });
 
 // make url data available as JSOn

@@ -22,5 +22,6 @@ TinyApp is a full stack web application built with Node and Express that allows 
 - Nodemon 
 
 ## Getting Started
-- Isntall all dependencies (using 'npm isntall' command)
--Run the development web server using the 'node index.js' command
+- Intall all dependencies (using 'npm isntall' command)
+- Run the development web server using the 'node index.js' command
+- Make sure you are connected to the internet, so that Bootstrap and Fontaesome can be accessed by HTML

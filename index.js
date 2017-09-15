@@ -94,7 +94,7 @@ function checkURL(req, res, next) {
 }
 function findUserByEmail(enteredEmail) {
   let userID;
-  for (user in users) {
+  for (const user in users) {
     if (users[user].email === enteredEmail) {
       userID = user;
     }
@@ -108,7 +108,7 @@ function findUserByEmail(enteredEmail) {
 function urlsForUser(id) {
   const filteredUrs = {};
   for (const link in urlDatabase) {
-    if (urlDatabase[link].owner == id) {
+    if (urlDatabase[link].owner === id) {
       filteredUrs[link] = urlDatabase[link];
     }
   }
@@ -117,7 +117,7 @@ function urlsForUser(id) {
 
 function countUniqueVisitors(link) {
   const uniqueVisitors = [];
-  for (visit of urlDatabase[link].visits) {
+  for (const visit of urlDatabase[link].visits) {
     if (!uniqueVisitors.includes(visit.visitor)) {
       uniqueVisitors.push(visit.visitor);
     }
@@ -129,7 +129,7 @@ function generateRandomString(database) {
   let str = '';
   const strLength = 6;
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  for (let i = 0; i < strLength; i++) {
+  for (let i = 0; i < strLength; i += 1) {
     str += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
   }
 
@@ -143,15 +143,11 @@ function returnRandomString(database) {
   return generateRandomString(database);
 }
 
-function entrypt(pw) {
-  return bcrypt.hashSync(pw, 10);
-}
-
 function saveLink(link) {
   if (link.includes('http://')) {
     return link;
   }
-  return `http://${  link}`;
+  return `http://${link}`;
 }
 
 for (const user in users) {
@@ -203,7 +199,7 @@ app.post('/register', (req, res) => {
   } else {
     const newEmail = req.body.email;
     const newPassword = req.body.password;
-    if (newEmail == '' || newPassword == '') {
+    if (newEmail === '' || newPassword === '') {
       res.statusCode = 400;
       res.render('field-empty');
     } else if (findUserByEmail(newEmail)) {
@@ -289,7 +285,7 @@ app.delete('/urls/:id', checkAuth, matchAuth, (req, res) => {
 // urls index page
 app.get('/urls', checkAuth, (req, res) => {
   const uniqueVisits = {};
-  for (url in urlDatabase) {
+  for (const url in urlDatabase) {
     uniqueVisits[url] = countUniqueVisitors(url);
   }
   res.render('urls_index', {
@@ -326,13 +322,13 @@ app.get('/u/:id', checkURL, (req, res) => {
     }
 
     // add 1 do visitor id session count
-    linkVisitors[req.session.visitor_id]++;
+    linkVisitors[req.session.visitor_id] += 1;
 
     // push session info into urlDatabase
     const longURL = urlDatabase[shortlink].fullLink;
     urlDatabase[shortlink].visits.push({
       visitor: req.session.visitor_id, time: moment().utcOffset('-07:00').format('dddd, MMMM Do YYYY, h:mm:ss a'),
-    } );
+    });
     res.redirect(longURL);
   }
 });

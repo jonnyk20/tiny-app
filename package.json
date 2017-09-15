@@ -11,7 +11,10 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "eslint": "^4.6.1",
     "eslint-config-airbnb": "^15.1.0",
+    "eslint-config-airbnb-base": "^12.0.0",
+    "eslint-plugin-import": "^2.7.0",
     "nodemon": "^1.12.0"
   },
   "dependencies": {
@@ -23,5 +26,9 @@
     "express": "^4.15.4",
     "method-override": "^2.3.9",
     "moment": "^2.18.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jonnyk20/tiny-app.git"
   }
 }

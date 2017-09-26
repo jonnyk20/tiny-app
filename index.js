@@ -48,7 +48,7 @@ const urlDatabase = [
   },
 ];
 
-const linkVisitors = [];
+const linkVisitors = new Set();
 
 const users = [
   {
@@ -131,7 +131,14 @@ function countUniqueVisitors(link) {
   return uniqueVisitors.length;
 }
 
-function generateRandomString(database) {
+function checkIfExists(database, str, isSet = false) {
+  if (isSet) {
+    return database.has(str);
+  }
+  return database[str];
+}
+
+function generateRandomString(database, isSet) {
   let str = '';
   const strLength = 6;
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -139,7 +146,7 @@ function generateRandomString(database) {
     str += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
   }
 
-  if (database[str]) {
+  if (checkIfExists(database, str, isSet)) {
     return generateRandomString();
   }
   return str;
@@ -257,13 +264,7 @@ app.post('/logout', (req, res) => {
 
 // access url-creation page
 app.get('/urls/new', checkAuth, (req, res) => {
-  if (req.session.user_id &&
-      users[req.session.user_id]
-  ) {
-    res.render('urls_new');
-  } else {
-    res.redirect('/login');
-  }
+  res.render('urls_new');
 });
 
 // access url edit page
@@ -283,7 +284,7 @@ app.put('/urls/:id', checkAuth, matchAuth, (req, res) => {
 
 // delete url
 app.delete('/urls/:id', checkAuth, matchAuth, (req, res) => {
-  delete urlDatabase[req.params.id];
+  urlDatabase.splice(urlDatabase.findIndex(url => url.shortLink === req.params.id), 1);
   res.redirect('/urls');
 });
 
@@ -302,34 +303,34 @@ app.post('/urls', checkAuth, (req, res) => {
     res.end('Invalid input');
   } else {
     const newLink = returnRandomString(urlDatabase);
-    urlDatabase[newLink] = {
+    urlDatabase.push({
+      shortLink: newLink,
       fullLink: saveLink(req.body.longURL),
       owner: req.session.user_id,
       visits: [],
       created: moment().utcOffset('-07:00').format('dddd, MMMM Do YYYY, h:mm:ss a'),
-    };
+    });
     res.redirect(302, `/urls/${newLink}`);
   }
 });
 
 // redirect short urls to long ones
 app.get('/u/:id', checkURL, (req, res) => {
-  const shortlink = req.params.id;
-  if (!urlDatabase[shortlink]) {
+  const shortLink = req.params.id;
+  if (!urlDatabase.find(url => url.shortLink === shortLink)) {
     res.render('unknown-url');
   } else {
     // create new visitor ID if it's not there
     if (!req.session.visitor_id) {
-      req.session.visitor_id = generateRandomString(linkVisitors);
-      linkVisitors[req.session.visitor_id] = 0;
+      req.session.visitor_id = generateRandomString(linkVisitors, true);
     }
 
     // add 1 do visitor id session count
-    linkVisitors[req.session.visitor_id] += 1;
+    linkVisitors.add(req.session.visitor_id);
 
     // push session info into urlDatabase
-    const longURL = urlDatabase[shortlink].fullLink;
-    urlDatabase[shortlink].visits.push({
+    const longURL = urlDatabase.find(link => link.shortLink === shortLink).fullLink;
+    urlDatabase.find(link => link.shortLink === shortLink).visits.push({
       visitor: req.session.visitor_id, time: moment().utcOffset('-07:00').format('dddd, MMMM Do YYYY, h:mm:ss a'),
     });
     res.redirect(longURL);

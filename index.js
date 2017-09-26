@@ -12,20 +12,23 @@ const PORT = process.env.PORT || 8080;
 app.set('view engine', 'ejs');
 
 // data-storing objects
-const urlDatabase = {
-  b2xVn2: {
+const urlDatabase = [
+  {
+    shortLink: 'b2xVn2',
     fullLink: 'http://www.lighthouselabs.ca',
     owner: 'userRandomID',
     visits: [],
     created: 'Wednesday, September 13th 2017, 9:34:44 pm',
   },
-  tgm5xK: {
+  {
+    shortLink: 'tgm5xK',
     fullLink: 'http://www.google.com',
     owner: 'user2RandomID',
     visits: [],
     created: 'Wednesday, September 13th 2017, 9:34:44 pm',
   },
-  abc123: {
+  {
+    shortLink: 'abc123',
     fullLink: 'http://www.example.com',
     owner: 'jonjon',
     visits: [{
@@ -43,27 +46,28 @@ const urlDatabase = {
     ],
     created: 'Wednesday, September 13th 2017, 9:34:44 pm',
   },
-};
+];
 
-const linkVisitors = {};
+const linkVisitors = [];
 
-const users = {
-  userRandomID: {
+const users = [
+  {
     id: 'userRandomID',
     email: 'user@example.com',
     password: 'purple-monkey-dinosaur',
   },
-  user2RandomID: {
+  {
     id: 'user2RandomID',
     email: 'user2@example.com',
     password: 'dishwasher-funk',
   },
-  jonjon: {
+  {
     id: 'jonjon',
     email: 'jon@jon.com',
     password: 'jon',
   },
-};
+];
+
 
 // helper functions
 
@@ -94,9 +98,11 @@ function checkURL(req, res, next) {
 }
 function findUserByEmail(enteredEmail) {
   let userID;
-  for (const user in users) {
-    if (users[user].email === enteredEmail) {
-      userID = user;
+  for (const user in users) { // eslint-disable-line no-prototype-buildtins
+    if (users.hasOwnProperty(user)) {
+      if (users[user].email === enteredEmail) {
+        userID = user;
+      }
     }
   }
   if (userID) {
@@ -105,23 +111,23 @@ function findUserByEmail(enteredEmail) {
   return false;
 }
 
-function urlsForUser(id) {
-  const filteredUrs = {};
-  for (const link in urlDatabase) {
-    if (urlDatabase[link].owner === id) {
-      filteredUrs[link] = urlDatabase[link];
-    }
-  }
+function findUserIdByEmail(email) {
+  return (Object.values(users).find(user => user.email === email) || {}).id;
+}
+
+function getUrlsForUser(id) {
+  const filteredUrs = urlDatabase.filter(urlObject => urlObject.owner === id);
   return filteredUrs;
 }
 
 function countUniqueVisitors(link) {
+  const linkObject = urlDatabase.find(item => item.shortLink === link);
   const uniqueVisitors = [];
-  for (const visit of urlDatabase[link].visits) {
+  linkObject.visits.forEach((visit) => {
     if (!uniqueVisitors.includes(visit.visitor)) {
       uniqueVisitors.push(visit.visitor);
     }
-  }
+  });
   return uniqueVisitors.length;
 }
 
@@ -168,7 +174,7 @@ app.use(cookieSession({
 app.use((req, res, next) => {
   const userID = req.session.user_id;
   res.locals = {
-    urlDatabase: urlsForUser(userID),
+    urlsForUser: getUrlsForUser(userID),
     user: users[userID],
   };
   next();
@@ -284,10 +290,7 @@ app.delete('/urls/:id', checkAuth, matchAuth, (req, res) => {
 
 // urls index page
 app.get('/urls', checkAuth, (req, res) => {
-  const uniqueVisits = {};
-  for (const url in urlDatabase) {
-    uniqueVisits[url] = countUniqueVisitors(url);
-  }
+  const uniqueVisits = res.locals.urlsForUser.map(url => countUniqueVisitors(url.shortLink));
   res.render('urls_index', {
     uniqueVisits,
   });

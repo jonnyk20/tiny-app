@@ -26,27 +26,27 @@
           <tr>
         </thead>
         <tbody>
-        <% Object.keys(urlDatabase).forEach(function(link) { %> 
+        <% urlsForUser.forEach(function(link, index) { %> 
           <tr class="dark-blue">
             <td>
               <a href="/u/<%= link %>" class="dark-blue">
-                <%= link %> 
+                <%= link.shortLink %> 
               </a>
             </td>
             <td>
               <a href="/u/<%= link %>" class="dark-blue">
-                <%= urlDatabase[link].fullLink %> 
+                <%= link.fullLink %> 
               </a>
             </td>
             <td>
-              <%= urlDatabase[link].created %> 
+              <%= link.created %> 
             </td>
             <td>
-              <%= urlDatabase[link].visits.length %>
+              <%= link.visits.length %>
             </td>
             <td>
-              <%= uniqueVisits[link] %>
-            </td>
+              <%= uniqueVisits[index] %>
+            </td> 
             <td>
               <a href="/urls/<%= link %>">
                 <button class="btn btn-primary btn-sm"> Edit </button>

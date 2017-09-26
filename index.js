@@ -80,7 +80,7 @@ function checkAuth(req, res, next) {
 }
 
 function matchAuth(req, res, next) {
-  if (req.session.user_id !== urlDatabase[req.params.id].owner) {
+  if (!req.session.user_id === urlDatabase.find(url => url.shortLink === req.params.id).owner) {
     res.statusCode = 401;
     res.render('wrong-user');
   } else {
@@ -89,7 +89,7 @@ function matchAuth(req, res, next) {
 }
 
 function checkURL(req, res, next) {
-  if (!urlDatabase[req.params.id]) {
+  if (!urlDatabase.find(url => url.shortLink === req.params.id)) {
     res.statusCode = 404;
     res.render('unknown-url');
   } else {
@@ -175,7 +175,7 @@ app.use((req, res, next) => {
   const userID = req.session.user_id;
   res.locals = {
     urlsForUser: getUrlsForUser(userID),
-    user: users[userID],
+    user: users.find(user => user.id === userID),
   };
   next();
 });
@@ -270,14 +270,14 @@ app.get('/urls/new', checkAuth, (req, res) => {
 app.get('/urls/:id', checkURL, checkAuth, matchAuth, (req, res) => {
   res.render('urls_show', {
     link: req.params.id,
-    linkObject: urlDatabase[req.params.id],
+    linkObject: urlDatabase.find(url => url.shortLink === req.params.id),
     unique: countUniqueVisitors(req.params.id),
   });
 });
 
 // save url edits
 app.put('/urls/:id', checkAuth, matchAuth, (req, res) => {
-  urlDatabase[req.params.id].fullLink = saveLink(req.body.longURL);
+  urlDatabase.find(url => url.shortLink === req.params.id).fullLink = saveLink(req.body.longURL);
   res.redirect('/urls');
 });
 

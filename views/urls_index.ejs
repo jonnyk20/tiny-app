@@ -48,10 +48,10 @@
               <%= uniqueVisits[index] %>
             </td> 
             <td>
-              <a href="/urls/<%= link %>">
+              <a href="/urls/<%= link.shortLink %>">
                 <button class="btn btn-primary btn-sm"> Edit </button>
               </a>
-              <form method="POST" action="/urls/<%= link %>?_method=DELETE">
+              <form method="POST" action="/urls/<%= link.shortLink %>?_method=DELETE">
               <button type="submit" class="btn btn-default btn-sm"> Delete</button>
               </form>
             </td>

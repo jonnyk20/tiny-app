@@ -8,67 +8,16 @@ const bodyParser = require('body-parser');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
+const urlDatabase = require('./url-database');
 
 app.set('view engine', 'ejs');
 
 
 // data-storing objects
-const urlDatabase = [
-  {
-    shortLink: 'b2xVn2',
-    fullLink: 'http://www.lighthouselabs.ca',
-    owner: 'userRandomID',
-    visits: [],
-    created: 'Wednesday, September 13th 2017, 9:34:44 pm',
-  },
-  {
-    shortLink: 'tgm5xK',
-    fullLink: 'http://www.google.com',
-    owner: 'user2RandomID',
-    visits: [],
-    created: 'Wednesday, September 13th 2017, 9:34:44 pm',
-  },
-  {
-    shortLink: 'abc123',
-    fullLink: 'http://www.example.com',
-    owner: 'jonjon',
-    visits: [{
-      visitor: 'visitor1',
-      time: 'Wednesday, September 13th 2017, 9:34:44 pm',
-    },
-    {
-      visitor: 'visitor1',
-      time: 'Thursday, September 14th 2017, 2:21:05 am',
-    },
-    {
-      visitor: 'visitor2',
-      time: 'Thursday, September 14th 2017, 5:28:19 am',
-    },
-    ],
-    created: 'Wednesday, September 13th 2017, 9:34:44 pm',
-  },
-];
 
 const linkVisitors = new Set();
 
-const users = [
-  {
-    id: 'userRandomID',
-    email: 'user@example.com',
-    password: '$2a$10$CneotMKjzu2fOY.MysLYo.1laVad1uLc1ufJQ7ZcZyFceb39cE/VG', // purple-monkey-dinosaur
-  },
-  {
-    id: 'user2RandomID',
-    email: 'user2@example.com',
-    password: '$2a$10$j4jW4LhbMQaO/3jCkOHDS.YiCzCIlJ3bXfdPzL1HZ5WMrUerzoXbC', // dishwasher-funk
-  },
-  {
-    id: 'jonjon',
-    email: 'jon@jon.com',
-    password: '$2a$10$Sf8Nc7sYdefzOBpNnAHsveFjpicumdQIvFfOI5ITJbENn4KC86i3a', // jon
-  },
-];
-
+const users = require('./users-database');
 
 // helper functions
 

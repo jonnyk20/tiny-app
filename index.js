@@ -11,6 +11,7 @@ const PORT = process.env.PORT || 8080;
 
 app.set('view engine', 'ejs');
 
+
 // data-storing objects
 const urlDatabase = [
   {
@@ -54,17 +55,17 @@ const users = [
   {
     id: 'userRandomID',
     email: 'user@example.com',
-    password: 'purple-monkey-dinosaur',
+    password: '$2a$10$CneotMKjzu2fOY.MysLYo.1laVad1uLc1ufJQ7ZcZyFceb39cE/VG', // purple-monkey-dinosaur
   },
   {
     id: 'user2RandomID',
     email: 'user2@example.com',
-    password: 'dishwasher-funk',
+    password: '$2a$10$j4jW4LhbMQaO/3jCkOHDS.YiCzCIlJ3bXfdPzL1HZ5WMrUerzoXbC', // dishwasher-funk
   },
   {
     id: 'jonjon',
     email: 'jon@jon.com',
-    password: 'jon',
+    password: '$2a$10$Sf8Nc7sYdefzOBpNnAHsveFjpicumdQIvFfOI5ITJbENn4KC86i3a', // jon
   },
 ];
 
@@ -72,7 +73,7 @@ const users = [
 // helper functions
 
 function checkAuth(req, res, next) {
-  if (!req.session.user_id) {
+  if (!req.session.user_id || !users.find(user => user.id === req.session.user_id)) {
     res.render('no-auth');
   } else {
     next();
@@ -97,23 +98,9 @@ function checkURL(req, res, next) {
   }
 }
 function findUserByEmail(enteredEmail) {
-  let userID;
-  for (const user in users) { // eslint-disable-line no-prototype-buildtins
-    if (users.hasOwnProperty(user)) {
-      if (users[user].email === enteredEmail) {
-        userID = user;
-      }
-    }
-  }
-  if (userID) {
-    return userID;
-  }
-  return false;
+  return users.find(user => user.email === enteredEmail);
 }
 
-function findUserIdByEmail(email) {
-  return (Object.values(users).find(user => user.email === email) || {}).id;
-}
 
 function getUrlsForUser(id) {
   const filteredUrs = urlDatabase.filter(urlObject => urlObject.owner === id);
@@ -163,11 +150,6 @@ function saveLink(link) {
   return `http://${link}`;
 }
 
-for (const user in users) {
-  users[user].password = bcrypt.hashSync(users[user].password, 10);
-}
-
-
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(methodOverride('_method'));
@@ -198,7 +180,7 @@ app.get('/', (req, res) => {
 
 // access registration page
 app.get('/register', (req, res) => {
-  if (req.session.user_id) {
+  if (req.session.user_id && users.find(user => user.id === req.session.user_id)) {
     res.redirect('/urls');
   } else {
     res.render('register');
@@ -207,7 +189,7 @@ app.get('/register', (req, res) => {
 
 // register new user
 app.post('/register', (req, res) => {
-  if (req.session.user_id) {
+  if (req.session.user_id && users.find(user => user.id === req.session.user_id)) {
     res.redirect('/urls');
   } else {
     const newEmail = req.body.email;
@@ -220,11 +202,11 @@ app.post('/register', (req, res) => {
       res.render('email-taken');
     } else {
       const newID = returnRandomString(users);
-      users[newID] = {
+      users.push({
         id: newID,
         email: newEmail,
         password: bcrypt.hashSync(newPassword, 10),
-      };
+      });
       req.session.user_id = newID;
       res.redirect('/urls');
     }
@@ -233,7 +215,7 @@ app.post('/register', (req, res) => {
 
 // access login page
 app.get('/login', (req, res) => {
-  if (req.session.user_id) {
+  if (req.session.user_id && users.find(user => user.id === req.session.user_id)) {
     res.redirect('/urls');
   } else {
     res.render('login');
@@ -243,10 +225,10 @@ app.get('/login', (req, res) => {
 // log in
 app.post('/login', (req, res) => {
   const emailEntered = req.body.email;
-  const idFound = findUserByEmail(emailEntered);
+  const idFound = findUserByEmail(emailEntered).id;
   const pwEntered = req.body.password;
   if (idFound &&
-    (bcrypt.compareSync(pwEntered, users[idFound].password))
+    (bcrypt.compareSync(pwEntered, users.find(user => user.id === idFound).password))
   ) {
     req.session.user_id = idFound;
     res.redirect('/urls');
@@ -287,7 +269,6 @@ app.delete('/urls/:id', checkAuth, matchAuth, (req, res) => {
   urlDatabase.splice(urlDatabase.findIndex(url => url.shortLink === req.params.id), 1);
   res.redirect('/urls');
 });
-
 
 // urls index page
 app.get('/urls', checkAuth, (req, res) => {
